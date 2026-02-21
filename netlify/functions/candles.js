@@ -35,7 +35,7 @@ export async function handler(event) {
       return { statusCode: 500, headers: cors, body: "Missing GitHub configuration (owner/repo/issue)" };
     }
 
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}/comments`;
 
     const headers = {
       "Accept": "application/vnd.github+json",
