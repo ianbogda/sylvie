@@ -451,6 +451,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script type="module">
+    //const API_BASE = "https://xxx.netlify.app/.netlify/functions";
     async function apiJson(url, opts = {}) {
       const res = await fetch(url, {
         headers: { "Content-Type": "application/json" },
@@ -475,30 +476,30 @@
     async function uploadAsset(file) {
       const base64 = await fileToBase64(file);
       const contentBase64 = base64.split(",")[1];
-      return apiJson("/.netlify/functions/upload", {
+      return apiJson(`${API_BASE}/upload`, {
         method: "POST",
         body: JSON.stringify({ filename: file.name, mime: file.type, contentBase64 })
       });
     }
 
     async function postMessage({ name, title, message }) {
-      return apiJson("/.netlify/functions/message", {
+      return apiJson(`${API_BASE}/message`, {
         method: "POST",
         body: JSON.stringify({ name, title, message })
       });
     }
 
     async function listMessages() {
-      return apiJson("/.netlify/functions/messages");
+      return apiJson(`${API_BASE}/messages`);
     }
 
     async function getCandles() {
-      const r = await apiJson("/.netlify/functions/candles");
+      const r = await apiJson(`${API_BASE}/candles`);
       return r.count || 0;
     }
 
     async function addCandle() {
-      await apiJson("/.netlify/functions/candle", { method: "POST", body: JSON.stringify({}) });
+      await apiJson(`${API_BASE}/candle`, { method: "POST", body: JSON.stringify({}) });
     }
 
     const $ = (s) => document.querySelector(s);
