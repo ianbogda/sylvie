@@ -13,6 +13,46 @@ function originIsAllowed(origin) {
   return allow.includes(origin);
 }
 
+function getClientIp(event) {
+  return (
+    event.headers["x-nf-client-connection-ip"] ||
+    event.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+    ""
+  );
+}
+
+const RATE = new Map();
+function rateLimit(key, limit, windowMs) {
+  const now = Date.now();
+  const cur = RATE.get(key);
+  if (!cur || now > cur.reset) {
+    RATE.set(key, { count: 1, reset: now windowMs });
+    return true;
+  }
+  if (cur.count >= limit) return false;
+  cur.count += 1;
+  return true;
+}
+
+async function verifyTurnstile(token, ip) {
+  const secret = process.env.TURNSTILE_SECRET;
+  if (!secret) throw new Error("TURNSTILE_SECRET missing");
+
+  const form = new URLSearchParams();
+  form.set("secret", secret);
+  form.set("response", token);
+  if (ip) form.set("remoteip", ip);
+
+  const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: form
+  });
+
+  const data = await res.json();
+  return !!data.success;
+}
+
 function clamp(s, n) { return String(s || "").trim().slice(0, n); }
 
 export async function handler(event) {
@@ -33,7 +73,27 @@ export async function handler(event) {
 
     if (!token || !owner || !repo) return { statusCode: 500, headers: cors, body: "Missing GitHub configuration" };
 
+    const ip = getClientIp(event);
+
+    if (!rateLimit(`msg:${ip}`, 4, 60_000)) {
+      return { statusCode: 429, body: "Too many messages" };
+    }
+
     const body = JSON.parse(event.body || "{}");
+
+    if (!body.turnstileToken) {
+      return { statusCode: 400, body: "Missing captcha" };
+    }
+
+    const okCaptcha = await verifyTurnstile(body.turnstileToken, ip);
+    if (!okCaptcha) {
+      return { statusCode: 400, body: "Captcha failed" };
+    }
+
+    if (!body.message || body.message.length < 3) {
+      return { statusCode: 400, body: "Invalid message" };
+    }
+
     const name = clamp(body.name, 60);
     const title = clamp(body.title, 80);
     const message = clamp(body.message, 1200);
