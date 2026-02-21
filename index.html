@@ -660,7 +660,7 @@
     }
 
     async function listAssets() {
-      return apiJson("/.netlify/functions/assets");
+      return apiJson("/.netlify/functions/assets?limit=60");
     }
 
     function renderGalleryFromAssets(items) {
@@ -746,7 +746,7 @@
                src="${escapeHtml(r.url)}"
                alt="Photo ajoutée">
         `;
-        $("#gallery").prepend(col);
+        await refreshGallery();
 
         showStatus("Photo ajoutée à la galerie et commitée dans GitHub.", "info");
       } catch (err) {

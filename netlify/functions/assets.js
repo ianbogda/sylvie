@@ -103,6 +103,9 @@ export async function handler(event) {
     // Tri "nouveaux d'abord" : les paths contiennent timestamp_... donc tri desc lexical marche bien
     files.sort((a, b) => (a < b ? 1 : -1));
 
+    const limit = Number(new URL(event.rawUrl).searchParams.get("limit") || "60");
+    const sliced = files.slice(0, Math.max(1, Math.min(200, limit)));
+    
     // RAW URLs (repo public)
     const items = files.map(p => ({
       path: p,
