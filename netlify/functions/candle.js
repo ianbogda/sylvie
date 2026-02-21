@@ -21,12 +21,13 @@ function getClientIp(event) {
   );
 }
 
-const RATE = new Map();
+// Best-effort rate limiter (in-memory)
+const RATE = new Map(); // key -> {count, reset}
 function rateLimit(key, limit, windowMs) {
   const now = Date.now();
   const cur = RATE.get(key);
   if (!cur || now > cur.reset) {
-    RATE.set(key, { count: 1, reset: now windowMs });
+    RATE.set(key, { count: 1, reset: now + windowMs });
     return true;
   }
   if (cur.count >= limit) return false;
@@ -37,6 +38,7 @@ function rateLimit(key, limit, windowMs) {
 async function verifyTurnstile(token, ip) {
   const secret = process.env.TURNSTILE_SECRET;
   if (!secret) throw new Error("TURNSTILE_SECRET missing");
+  if (!token) return false;
 
   const form = new URLSearchParams();
   form.set("secret", secret);
@@ -65,34 +67,27 @@ export async function handler(event) {
   }
 
   try {
+    const ip = getClientIp(event);
+    if (!rateLimit(`candle:${ip}`, 8, 60_000)) {
+      return { statusCode: 429, headers: cors, body: "Too many requests" };
+    }
+
+    const body = JSON.parse(event.body || "{}");
+    const okCaptcha = await verifyTurnstile(body.turnstileToken, ip);
+    if (!okCaptcha) {
+      return { statusCode: 400, headers: cors, body: "Captcha failed" };
+    }
+
     const token = process.env.GITHUB_TOKEN;
     const owner = process.env.GITHUB_OWNER;
     const repo = process.env.GITHUB_REPO;
     const issueNumber = process.env.CANDLE_ISSUE_NUMBER;
-    const reaction = process.env.CANDLE_REACTION || "heart";
 
     if (!token || !owner || !repo || !issueNumber) {
-      return { statusCode: 500, headers: cors, body: "Missing GitHub configuration (token/owner/repo/issue)" };
+      return { statusCode: 500, headers: cors, body: "Missing GitHub configuration" };
     }
 
-    const ip = getClientIp(event);
-
-    if (!rateLimit(`candle:${ip}`, 8, 60_000)) {
-      return { statusCode: 429, body: "Too many candles" };
-    }
-
-    const body = JSON.parse(event.body || "{}");
-
-    if (!body.turnstileToken) {
-      return { statusCode: 400, body: "Missing captcha" };
-    }
-
-    const okCaptcha = await verifyTurnstile(body.turnstileToken, ip);
-    if (!okCaptcha) {
-      return { statusCode: 400, body: "Captcha failed" };
-    }
-
-    // Create reaction on the dedicated issue
+    // ✅ IMPORTANT: use COMMENTS (not reactions) so the counter can grow beyond 1
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}/comments`;
 
     const res = await fetch(apiUrl, {
@@ -103,9 +98,7 @@ export async function handler(event) {
         "User-Agent": "sylvie-candles",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        body: "🕯️"
-      })
+      body: JSON.stringify({ body: "🕯️" })
     });
 
     const data = await res.json();
