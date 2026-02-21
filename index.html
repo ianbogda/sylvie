@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Hommage — Sylvie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400,600,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --ink:#0f172a;
+      --muted:#64748b;
+      --stroke:rgba(15,23,42,.10);
+      --card: rgba(255,255,255,.78);
+      --shadow: 0 18px 55px rgba(2,6,23,.10);
+      --r: 22px;
+
+      --lilac: rgba(196,181,253,.16);
+      --blush: rgba(251,207,232,.14);
+      --mint:  rgba(45,212,191,.10);
+      --warm:  rgba(251,191,36,.10);
+    }
+
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 520px at 18% 8%, var(--lilac), transparent 62%),
+        radial-gradient(900px 520px at 82% 10%, var(--blush), transparent 62%),
+        radial-gradient(900px 520px at 50% 105%, var(--mint), transparent 62%),
+        linear-gradient(180deg, #fbfcfe, #f6f7ff 42%, #fbfcfe);
+      min-height: 100vh;
+    }
+
+    .glass{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      border-radius: var(--r);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .brandPill{
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.70);
+      border-radius: 999px;
+      padding: 8px 12px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:999px;
+      background: linear-gradient(135deg, rgba(196,181,253,.95), rgba(251,207,232,.85));
+      box-shadow: 0 0 0 4px rgba(196,181,253,.14);
+    }
+
+    .hero{position:relative; overflow:hidden;}
+    .hero::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(1200px 420px at 18% 5%, rgba(196,181,253,.18), transparent 58%),
+        radial-gradient(1200px 420px at 82% 6%, rgba(251,207,232,.14), transparent 58%),
+        radial-gradient(1200px 420px at 50% 115%, rgba(45,212,191,.10), transparent 58%);
+      pointer-events:none;
+    }
+    .heroInner{position:relative; padding: 34px 28px;}
+    @media (max-width: 768px){ .heroInner{padding: 26px 18px;} }
+
+    .avatarWrap{
+      width: 152px; height: 152px;
+      border-radius: 28px;
+      padding: 10px;
+      background: linear-gradient(135deg, rgba(196,181,253,.16), rgba(251,207,232,.12), rgba(45,212,191,.10));
+      border: 1px solid rgba(15,23,42,.10);
+      box-shadow: 0 18px 50px rgba(2,6,23,.14);
+      transform: rotate(-.8deg);
+    }
+    .avatar{
+      width: 100%; height: 100%;
+      border-radius: 22px;
+      object-fit: cover;
+      border: 1px solid rgba(15,23,42,.10);
+      background: #eef2f7;
+    }
+
+    .title{
+      font-family: Fraunces, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+      letter-spacing: -0.03em;
+      line-height: 1.03;
+      font-weight: 700;
+      font-size: clamp(34px, 4.8vw, 62px);
+      margin: 0;
+    }
+    .subtitle{
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin-top: 10px;
+      max-width: 70ch;
+    }
+
+    .tag{
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.70);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 700;
+      font-size: .88rem;
+    }
+
+    .divider{
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(15,23,42,.14), transparent);
+      margin: 18px 0;
+    }
+
+    .btn-soft{
+      border: 1px solid rgba(15,23,42,.14);
+      background: rgba(255,255,255,.72);
+      border-radius: 999px;
+      font-weight: 800;
+    }
+    .btn-soft:hover{background: rgba(255,255,255,.88);}
+
+    .btn-candle{
+      border: 1px solid rgba(251,191,36,.28);
+      background: rgba(251,191,36,.12);
+      border-radius: 16px;
+      font-weight: 900;
+      padding: 12px 14px;
+    }
+
+    .metric{
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.70);
+    }
+    .metric .k{font-size:.85rem; color: var(--muted); font-weight: 700;}
+    .metric .v{font-size: 1.85rem; font-weight: 900; margin-top: 6px;}
+
+    .poem{
+      font-family: Fraunces, ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+      font-size: 1.12rem;
+      line-height: 1.65;
+      color: rgba(15,23,42,.92);
+      margin: 0;
+    }
+    .poemMark{
+      width: 38px; height: 38px; border-radius: 14px;
+      display:grid; place-items:center;
+      background: rgba(196,181,253,.10);
+      border: 1px solid rgba(15,23,42,.10);
+      font-size: 18px;
+    }
+
+    /* Gallery */
+    .gallery img{
+      width:100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 16px;
+      border: 1px solid rgba(15,23,42,.10);
+      transition: transform .18s ease, box-shadow .18s ease;
+      cursor: pointer;
+      background: #eef2f7;
+    }
+    .gallery img:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(2,6,23,.12);
+    }
+
+    /* Guestbook */
+    .msg{
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.70);
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+    .msg .top{display:flex; justify-content:space-between; gap:10px; align-items:baseline;}
+    .msg .name{font-weight: 900;}
+    .msg .date{font-size:.85rem; color: var(--muted);}
+    .msg .text{margin-top: 8px; white-space: pre-wrap;}
+
+    .smallMuted{color: var(--muted); font-size: .92rem;}
+
+    .status{
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.78);
+      border-radius: 16px;
+      padding: 10px 12px;
+      display:none;
+    }
+    .status.show{display:block;}
+
+    @media print{
+      body{background:#fff}
+      .no-print{display:none !important}
+      .glass{box-shadow:none; backdrop-filter:none}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container py-4 py-lg-5">
+
+    <div class="d-flex justify-content-between align-items-center gap-2 mb-3 no-print">
+      <div class="brandPill">
+        <span class="dot" aria-hidden="true"></span>
+        <strong>Espace hommage</strong>
+        <span class="smallMuted">— Sylvie</span>
+      </div>
+
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-sm btn-soft px-3" id="shareBtn" type="button">Partager</button>
+        <button class="btn btn-sm btn-soft px-3" id="printBtn" type="button">Imprimer</button>
+        <a class="btn btn-sm btn-soft px-3" href="#messages">Laisser un message</a>
+      </div>
+    </div>
+
+    <section class="glass hero">
+      <div class="heroInner">
+        <div class="row align-items-center g-4">
+          <div class="col-md-auto text-center text-md-start">
+            <div class="avatarWrap mx-auto mx-md-0">
+              <img class="avatar"
+                   id="portraitImg"
+                   src="https://images.unsplash.com/photo-1520975958225-66f2c88f4a42?auto=format&fit=crop&w=700&q=80"
+                   alt="Portrait">
+            </div>
+          </div>
+
+          <div class="col">
+            <h1 class="title">Sylvie</h1>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <span class="tag">🕊️ 1950 — 2026</span>
+              <span class="tag">« La douceur demeure. »</span>
+            </div>
+
+            <p class="subtitle">
+              Une page lumineuse et sobre pour rassembler des souvenirs, des images et des mots.
+            </p>
+
+            <div class="divider"></div>
+
+            <div class="row g-3 align-items-stretch">
+              <div class="col-6 col-lg-3">
+                <div class="metric h-100">
+                  <div class="k">Bougies</div>
+                  <div class="v" id="candleCount">—</div>
+                </div>
+              </div>
+              <div class="col-6 col-lg-3">
+                <div class="metric h-100">
+                  <div class="k">Messages</div>
+                  <div class="v" id="msgCount">0</div>
+                </div>
+              </div>
+              <div class="col-12 col-lg-6">
+                <button class="w-100 btn btn-candle h-100" id="candleBtn" type="button">
+                  🕯️ Allumer une bougie
+                </button>
+                <div class="smallMuted mt-2">
+                  Bougies : compteur GitHub (réactions sur une Issue dédiée). Messages : GitHub Issues (label <code>guestbook</code>).
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="status mt-3" id="statusBox" role="status" aria-live="polite"></div>
+
+    <div class="row g-4 mt-1">
+      <div class="col-lg-7">
+
+        <section class="glass p-4">
+          <div class="d-flex align-items-start gap-3">
+            <div class="poemMark" aria-hidden="true">❦</div>
+            <div>
+              <h2 class="h5 mb-2" style="font-weight:900; letter-spacing:-.01em;">Texte court</h2>
+              <p class="poem">
+                « Les jours passent, mais certaines présences restent.
+                Dans nos gestes, nos mots, nos souvenirs — il y a encore de la lumière. »
+              </p>
+              <div class="smallMuted mt-2">
+                (Modifiable) — 2 à 4 phrases maximum.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="glass p-4 mt-4">
+          <h2 class="h5 mb-2" style="font-weight:900; letter-spacing:-.01em;">Biographie</h2>
+          <p class="mb-2">
+            Décrivez ici la vie de Sylvie : ses valeurs, ses passions, les moments qui comptent.
+            Quelques détails précis valent mieux qu’un long texte.
+          </p>
+          <p class="smallMuted mb-0">
+            Conseil : 2–3 paragraphes courts, respirations, et une phrase-signature.
+          </p>
+        </section>
+
+        <section class="glass p-4 mt-4">
+          <div class="d-flex justify-content-between align-items-baseline gap-2 flex-wrap">
+            <div>
+              <h2 class="h5 mb-1" style="font-weight:900; letter-spacing:-.01em;">Galerie</h2>
+              <div class="smallMuted">Les nouvelles photos sont “pushées” dans GitHub (<code>assets/</code>) via Netlify Functions.</div>
+            </div>
+            <div class="no-print">
+              <label class="btn btn-soft btn-sm px-3">
+                Ajouter une photo
+                <input id="uploadInput" type="file" accept="image/*" hidden>
+              </label>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-2 gallery" id="gallery">
+            <div class="col-sm-6">
+              <img data-cap="Souvenir"
+                   data-full="https://images.unsplash.com/photo-1482192596544-9eb780fc7f66?auto=format&fit=crop&w=2400&q=80"
+                   src="https://images.unsplash.com/photo-1482192596544-9eb780fc7f66?auto=format&fit=crop&w=1200&q=80"
+                   alt="Souvenir 1">
+            </div>
+            <div class="col-sm-6">
+              <img data-cap="Souvenir"
+                   data-full="https://images.unsplash.com/photo-1520975661595-6453be3f7070?auto=format&fit=crop&w=2400&q=80"
+                   src="https://images.unsplash.com/photo-1520975661595-6453be3f7070?auto=format&fit=crop&w=1200&q=80"
+                   alt="Souvenir 2">
+            </div>
+          </div>
+
+          <div class="smallMuted mt-3">
+            Astuce : privilégie des images ~1600px de large, lumière naturelle, contraste doux.
+          </div>
+        </section>
+
+        <section class="glass p-4 mt-4" id="messages">
+          <div class="d-flex justify-content-between align-items-baseline gap-2 flex-wrap">
+            <div>
+              <h2 class="h5 mb-1" style="font-weight:900; letter-spacing:-.01em;">Livre de messages</h2>
+              <div class="smallMuted">Chaque message crée une Issue GitHub labelisée <code>guestbook</code>.</div>
+            </div>
+            <button class="btn btn-soft btn-sm px-3 no-print" id="refreshBtn" type="button">Actualiser</button>
+          </div>
+
+          <form id="guestForm" class="row g-2 mt-3 no-print">
+            <div class="col-md-4">
+              <input class="form-control" id="name" maxlength="60" placeholder="Votre nom" required>
+            </div>
+            <div class="col-md-8">
+              <input class="form-control" id="title" maxlength="80" placeholder="Objet (optionnel)">
+            </div>
+            <div class="col-12">
+              <textarea class="form-control" id="message" rows="4" maxlength="1200" placeholder="Votre message…" required></textarea>
+            </div>
+            <div class="col-12 d-flex gap-2 align-items-center">
+              <button class="btn btn-dark px-4" type="submit" id="submitBtn">Publier</button>
+              <span class="smallMuted ms-auto" id="charLeft"></span>
+            </div>
+          </form>
+
+          <div class="mt-4 d-grid gap-2" id="guestList" aria-live="polite"></div>
+        </section>
+      </div>
+
+      <div class="col-lg-5">
+        <section class="glass p-4">
+          <h2 class="h5 mb-3" style="font-weight:900; letter-spacing:-.01em;">Repères</h2>
+          <div class="d-grid gap-2">
+            <div class="p-3 rounded-4" style="border:1px solid rgba(15,23,42,.10); background:rgba(255,255,255,.70);">
+              <div class="small fw-bold" style="letter-spacing:.06em; color:rgba(100,116,139,.95);">1950</div>
+              <div>Naissance à …</div>
+            </div>
+            <div class="p-3 rounded-4" style="border:1px solid rgba(15,23,42,.10); background:rgba(255,255,255,.70);">
+              <div class="small fw-bold" style="letter-spacing:.06em; color:rgba(100,116,139,.95);">1973</div>
+              <div>Un souvenir marquant : …</div>
+            </div>
+            <div class="p-3 rounded-4" style="border:1px solid rgba(15,23,42,.10); background:rgba(255,255,255,.70);">
+              <div class="small fw-bold" style="letter-spacing:.06em; color:rgba(100,116,139,.95);">2026</div>
+              <div>Décès — entourée des siens</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="glass p-4 mt-4">
+          <h2 class="h5 mb-2" style="font-weight:900; letter-spacing:-.01em;">Informations</h2>
+          <div class="smallMuted">
+            <div class="mb-2">
+              <strong class="text-dark">Cérémonie</strong><br>
+              (à renseigner) — Lieu / date / heure
+            </div>
+            <div class="mb-2">
+              <strong class="text-dark">Fleurs / dons</strong><br>
+              Optionnel : lien vers une association.
+            </div>
+            <div>
+              <strong class="text-dark">Contact</strong><br>
+              Optionnel : email@exemple.fr
+            </div>
+          </div>
+        </section>
+
+        <section class="glass p-4 mt-4">
+          <h2 class="h5 mb-2" style="font-weight:900; letter-spacing:-.01em;">Modération</h2>
+          <div class="smallMuted">
+            Pour masquer un message : enlève le label <code>guestbook</code> de l’Issue correspondante (dans GitHub).
+            Tu peux aussi fermer l’Issue. Pour les bougies : lock l’Issue technique si besoin.
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="imgModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content glass" style="border-radius:18px;">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="modalCap" style="font-weight:900;"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body pt-0">
+          <img id="modalImg" alt="Photo agrandie" class="img-fluid rounded-4 border" style="border-color: rgba(15,23,42,.10) !important;">
+          <div class="smallMuted mt-2" id="modalMeta"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script type="module">
+    async function apiJson(url, opts = {}) {
+      const res = await fetch(url, {
+        headers: { "Content-Type": "application/json" },
+        ...opts
+      });
+      const text = await res.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch {}
+      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+      return json ?? {};
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+
+    async function uploadAsset(file) {
+      const base64 = await fileToBase64(file);
+      const contentBase64 = base64.split(",")[1];
+      return apiJson("/.netlify/functions/upload", {
+        method: "POST",
+        body: JSON.stringify({ filename: file.name, mime: file.type, contentBase64 })
+      });
+    }
+
+    async function postMessage({ name, title, message }) {
+      return apiJson("/.netlify/functions/message", {
+        method: "POST",
+        body: JSON.stringify({ name, title, message })
+      });
+    }
+
+    async function listMessages() {
+      return apiJson("/.netlify/functions/messages");
+    }
+
+    async function getCandles() {
+      const r = await apiJson("/.netlify/functions/candles");
+      return r.count || 0;
+    }
+
+    async function addCandle() {
+      await apiJson("/.netlify/functions/candle", { method: "POST", body: JSON.stringify({}) });
+    }
+
+    const $ = (s) => document.querySelector(s);
+    const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+
+    function showStatus(msg, kind="info") {
+      const box = $("#statusBox");
+      box.classList.add("show");
+      box.innerHTML = `<strong>${kind === "error" ? "Erreur" : "Info"} :</strong> ${escapeHtml(msg)}`;
+      if (kind === "error") box.style.borderColor = "rgba(239,68,68,.35)";
+      else box.style.borderColor = "rgba(15,23,42,.10)";
+      clearTimeout(showStatus._t);
+      showStatus._t = setTimeout(() => box.classList.remove("show"), 4500);
+    }
+
+    // Candles (GitHub reactions)
+    async function refreshCandles() {
+      try {
+        const n = await getCandles();
+        $("#candleCount").textContent = String(n);
+      } catch (e) {
+        $("#candleCount").textContent = "—";
+        showStatus(e.message || String(e), "error");
+      }
+    }
+
+    $("#candleBtn").addEventListener("click", async () => {
+      const btn = $("#candleBtn");
+      const old = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "🕯️ …";
+      try {
+        await addCandle();
+        await refreshCandles();
+        btn.textContent = "🕯️ Bougie allumée";
+        setTimeout(() => (btn.textContent = old), 900);
+      } catch (e) {
+        showStatus(e.message || String(e), "error");
+        btn.textContent = old;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // Guestbook
+    function renderMessages(items) {
+      $("#msgCount").textContent = String(items.length);
+      const list = $("#guestList");
+
+      if (!items.length) {
+        list.innerHTML = `<div class="smallMuted">Aucun message pour le moment.</div>`;
+        return;
+      }
+
+      list.innerHTML = items.map(m => `
+        <div class="msg">
+          <div class="top">
+            <div class="name">${escapeHtml(m.name || "Anonyme")}</div>
+            <div class="date">${new Date(m.created_at).toLocaleString("fr-FR")}</div>
+          </div>
+          <div class="text">${escapeHtml(m.message || "")}</div>
+          <div class="smallMuted mt-2">
+            <a href="${escapeHtml(m.url)}" target="_blank" rel="noopener">Voir sur GitHub</a>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function refreshMessages() {
+      try {
+        const r = await listMessages();
+        renderMessages(r.items || []);
+      } catch (e) {
+        showStatus(e.message || String(e), "error");
+      }
+    }
+
+    const msgEl = $("#message");
+    const leftEl = $("#charLeft");
+    function updateCharLeft(){
+      const max = msgEl.maxLength || 1200;
+      leftEl.textContent = `${max - msgEl.value.length} caractères restants`;
+    }
+    msgEl.addEventListener("input", updateCharLeft);
+
+    $("#guestForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = $("#name").value.trim();
+      const title = $("#title").value.trim();
+      const message = $("#message").value.trim();
+      if (!name || !message) return;
+
+      const btn = $("#submitBtn");
+      btn.disabled = true;
+      btn.textContent = "Publication…";
+
+      try {
+        await postMessage({ name, title, message });
+        $("#message").value = "";
+        updateCharLeft();
+        showStatus("Message publié.", "info");
+        await refreshMessages();
+      } catch (err) {
+        showStatus(err.message || String(err), "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Publier";
+      }
+    });
+
+    $("#refreshBtn").addEventListener("click", refreshMessages);
+
+    // Gallery modal + upload
+    const modal = new bootstrap.Modal(document.getElementById("imgModal"));
+    $("#gallery").addEventListener("click", (e) => {
+      const img = e.target.closest("img");
+      if (!img) return;
+      $("#modalCap").textContent = img.dataset.cap || "Souvenir";
+      $("#modalImg").src = img.dataset.full || img.src;
+      $("#modalMeta").textContent = img.dataset.meta || "";
+      modal.show();
+    });
+
+    $("#uploadInput").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        showStatus("Type de fichier non supporté (image seulement).", "error");
+        return;
+      }
+      if (file.size > 6_000_000) {
+        showStatus("Image trop lourde (max ~6 MB).", "error");
+        return;
+      }
+
+      showStatus("Upload en cours…", "info");
+
+      try {
+        const r = await uploadAsset(file);
+        if (!r?.url) throw new Error("Upload OK mais URL manquante.");
+
+        const col = document.createElement("div");
+        col.className = "col-sm-6";
+        col.innerHTML = `
+          <img data-cap="Photo ajoutée"
+               data-full="${escapeHtml(r.url)}"
+               data-meta="Ajoutée via Netlify → commit GitHub"
+               src="${escapeHtml(r.url)}"
+               alt="Photo ajoutée">
+        `;
+        $("#gallery").prepend(col);
+
+        showStatus("Photo ajoutée à la galerie et commitée dans GitHub.", "info");
+      } catch (err) {
+        showStatus(err.message || String(err), "error");
+      } finally {
+        e.target.value = "";
+      }
+    });
+
+    // Share/Print
+    $("#printBtn").addEventListener("click", () => window.print());
+    $("#shareBtn").addEventListener("click", async () => {
+      const data = { title: document.title, text: "Espace hommage", url: location.href };
+      if (navigator.share) {
+        try { await navigator.share(data); } catch {}
+      } else {
+        try { await navigator.clipboard.writeText(location.href); showStatus("Lien copié.", "info"); }
+        catch { prompt("Copiez le lien :", location.href); }
+      }
+    });
+
+    // Init
+    updateCharLeft();
+    await refreshMessages();
+    await refreshCandles();
+  </script>
+</body>
+</html>
