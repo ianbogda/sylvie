@@ -807,7 +807,7 @@
       await loadGalleryPage(galleryPage);
     }
 
-    $("loadMoreBtn").addEventListener("click", async () => {
+    $("#loadMoreBtn").addEventListener("click", async () => {
       if (!galleryHasMore) return;
       galleryPage += 1;
       await loadGalleryPage(galleryPage);
