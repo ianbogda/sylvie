@@ -552,9 +552,6 @@
             <div class="date">${new Date(m.created_at).toLocaleString("fr-FR")}</div>
           </div>
           <div class="text">${escapeHtml(m.message || "")}</div>
-          <div class="smallMuted mt-2">
-            <a href="${escapeHtml(m.url)}" target="_blank" rel="noopener">Voir sur GitHub</a>
-          </div>
         </div>
       `).join("");
     }
