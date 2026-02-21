@@ -39,6 +39,16 @@
       min-height: 100vh;
     }
 
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.06;
+      mix-blend-mode:multiply;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+    }
+
     .glass{
       background: var(--card);
       border: 1px solid var(--stroke);
@@ -244,7 +254,7 @@
             <h1 class="title">Sylvie</h1>
 
             <div class="d-flex flex-wrap gap-2 mt-3">
-              <span class="tag">🕊️ 1950 — 2026</span>
+              <span class="tag">🕊️ 1955 — 2026</span>
               <span class="tag">« La douceur demeure. »</span>
             </div>
 
@@ -271,9 +281,6 @@
                 <button class="w-100 btn btn-candle h-100" id="candleBtn" type="button">
                   🕯️ Allumer une bougie
                 </button>
-                <div class="smallMuted mt-2">
-                  Bougies : compteur GitHub (réactions sur une Issue dédiée). Messages : GitHub Issues (label <code>guestbook</code>).
-                </div>
               </div>
             </div>
 
@@ -291,10 +298,10 @@
           <div class="d-flex align-items-start gap-3">
             <div class="poemMark" aria-hidden="true">❦</div>
             <div>
-              <h2 class="h5 mb-2" style="font-weight:900; letter-spacing:-.01em;">Texte court</h2>
+              <h2 class="h5 mb-2" style="font-weight:900; letter-spacing:-.01em;">Tous capables !</h2>
               <p class="poem">
-                « Les jours passent, mais certaines présences restent.
-                Dans nos gestes, nos mots, nos souvenirs — il y a encore de la lumière. »
+                « Souvenez-vous de ceux qui vous ont guidés ;
+                considérez leur vie, et imitez leur foi. »
               </p>
               <div class="smallMuted mt-2">
                 (Modifiable) — 2 à 4 phrases maximum.
@@ -439,7 +446,13 @@
       </div>
     </div>
   </div>
-
+  
+  <div class="toast-container position-fixed bottom-0 end-0 p-3 no-print">
+    <div id="toast" class="toast glass" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-body" id="toastBody"></div>
+    </div>
+  </div>
+  
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script type="module">
@@ -499,13 +512,12 @@
     }[c]));
 
     function showStatus(msg, kind="info") {
-      const box = $("#statusBox");
-      box.classList.add("show");
-      box.innerHTML = `<strong>${kind === "error" ? "Erreur" : "Info"} :</strong> ${escapeHtml(msg)}`;
-      if (kind === "error") box.style.borderColor = "rgba(239,68,68,.35)";
-      else box.style.borderColor = "rgba(15,23,42,.10)";
-      clearTimeout(showStatus._t);
-      showStatus._t = setTimeout(() => box.classList.remove("show"), 4500);
+      const el = document.getElementById("toast");
+      document.getElementById("toastBody").innerHTML =
+        `<strong>${kind === "error" ? "Erreur" : "Info"} :</strong> ${escapeHtml(msg)}`;
+    
+      const t = bootstrap.Toast.getOrCreateInstance(el, { delay: 3500 });
+      t.show();
     }
 
     // Candles (GitHub reactions)
@@ -561,8 +573,25 @@
       `).join("");
     }
 
+    function renderSkeleton() {
+      const list = document.getElementById("guestList");
+      list.innerHTML = `
+        <div class="msg"><div class="placeholder-glow">
+          <span class="placeholder col-4"></span>
+          <span class="placeholder col-7"></span>
+          <span class="placeholder col-9"></span>
+        </div></div>
+        <div class="msg"><div class="placeholder-glow">
+          <span class="placeholder col-3"></span>
+          <span class="placeholder col-8"></span>
+          <span class="placeholder col-10"></span>
+        </div></div>
+      `;
+    }
+    
     async function refreshMessages() {
       try {
+        renderSkeleton();
         const r = await listMessages();
         renderMessages(r.items || []);
       } catch (e) {
@@ -606,6 +635,30 @@
     $("#refreshBtn").addEventListener("click", refreshMessages);
 
     // Gallery modal + upload
+    async function compressImage(file, { maxWidth = 1600, quality = 0.82 } = {}) {
+      const bitmap = await createImageBitmap(file);
+    
+      const scale = Math.min(1, maxWidth / bitmap.width);
+      const w = Math.round(bitmap.width * scale);
+      const h = Math.round(bitmap.height * scale);
+    
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+    
+      const ctx = canvas.getContext("2d", { alpha: false });
+      ctx.drawImage(bitmap, 0, 0, w, h);
+    
+      // JPEG (stable + léger)
+      const blob = await new Promise((resolve) =>
+        canvas.toBlob(resolve, "image/jpeg", quality)
+      );
+    
+      if (!blob) throw new Error("Compression failed");
+      const newFile = new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+      return newFile;
+    }
+    
     const modal = new bootstrap.Modal(document.getElementById("imgModal"));
     $("#gallery").addEventListener("click", (e) => {
       const img = e.target.closest("img");
@@ -617,18 +670,22 @@
     });
 
     $("#uploadInput").addEventListener("change", async (e) => {
-      const file = e.target.files?.[0];
+      let file = e.target.files?.[0];
       if (!file) return;
-
+      
       if (!file.type.startsWith("image/")) {
-        showStatus("Type de fichier non supporté (image seulement).", "error");
+        showStatus("Type non supporté (image).", "error");
         return;
       }
-      if (file.size > 6_000_000) {
-        showStatus("Image trop lourde (max ~6 MB).", "error");
+      
+      showStatus("Optimisation de l’image…", "info");
+      file = await compressImage(file, { maxWidth: 1600, quality: 0.82 });
+      
+      if (file.size > 1_500_000) {
+        showStatus("Image encore trop lourde. Réduis la qualité (0.75) ou la largeur (1400).", "error");
         return;
       }
-
+      
       showStatus("Upload en cours…", "info");
 
       try {
