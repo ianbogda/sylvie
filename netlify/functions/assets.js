@@ -103,19 +103,27 @@ export async function handler(event) {
     // Tri "nouveaux d'abord" : les paths contiennent timestamp_... donc tri desc lexical marche bien
     files.sort((a, b) => (a < b ? 1 : -1));
 
-    const limit = Number(new URL(event.rawUrl).searchParams.get("limit") || "60");
-    const sliced = files.slice(0, Math.max(1, Math.min(200, limit)));
-    
-    // RAW URLs (repo public)
-    const items = files.map(p => ({
-      path: p,
-      url: `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${p}`
+    const url = new URL(event.rawUrl);
+    const page = Math.max(1, Number(url.searchParams.get("page") || "1"));
+    const perPageRaw = Number(url.searchParams.get("per_page") || "24");
+    const per_page = Math.max(6, Math.min(60, perPageRaw)); // borne sécurité
+
+    const total = files.length;
+    const start = (page - 1) * per_page;
+    const end = start + per_page;
+
+    const slice = files.slice(start, end);
+    const has_more = end < total;
+
+    const items = slice.map(p => ({
+    path: p,
+    url: `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${p}`
     }));
 
     return {
-      statusCode: 200,
-      headers: { ...cors, "Content-Type": "application/json" },
-      body: JSON.stringify({ ok: true, count: items.length, items })
+    statusCode: 200,
+    headers: { ...cors, "Content-Type": "application/json" },
+    body: JSON.stringify({ ok: true, page, per_page, total, has_more, items })
     };
   } catch (e) {
     return { statusCode: 500, headers: cors, body: `Server error: ${e?.message || e}` };
