@@ -622,7 +622,7 @@
 
     // Gallery modal + upload
     let galleryPage = 1;
-    const GALLERY_PER_PAGE = 24;
+    const GALLERY_PER_PAGE = 12;
     let galleryHasMore = true;
 
     async function compressImage(file, { maxWidth = 1600, quality = 0.82 } = {}) {
@@ -649,7 +649,7 @@
       return newFile;
     }
 
-    async function listAssets(page, perPage) {
+    async function listAssets(page = 1, perPage = 12) {
       return apiJson(`/.netlify/functions/assets?page=${page}&per_page=${perPage}`);
     }
 

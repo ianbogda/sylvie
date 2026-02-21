@@ -101,12 +101,16 @@ export async function handler(event) {
       .filter(p => p && p.startsWith(prefix + "/") && isImagePath(p));
 
     // Tri "nouveaux d'abord" : les paths contiennent timestamp_... donc tri desc lexical marche bien
-    files.sort((a, b) => (a < b ? 1 : -1));
+    files.sort((a, b) => (a < b ? 1 : -1)); // desc
 
     const url = new URL(event.rawUrl);
     const page = Math.max(1, Number(url.searchParams.get("page") || "1"));
-    const perPageRaw = Number(url.searchParams.get("per_page") || "24");
-    const per_page = Math.max(6, Math.min(60, perPageRaw)); // borne sécurité
+
+    const perPageRaw = url.searchParams.has("per_page")
+      ? Number(url.searchParams.get("per_page"))
+      : 12; // défaut = 12
+
+    const per_page = Math.max(6, Math.min(60, perPageRaw));
 
     const total = files.length;
     const start = (page - 1) * per_page;
@@ -116,14 +120,14 @@ export async function handler(event) {
     const has_more = end < total;
 
     const items = slice.map(p => ({
-    path: p,
-    url: `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${p}`
+      path: p,
+      url: `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${p}`
     }));
 
     return {
-    statusCode: 200,
-    headers: { ...cors, "Content-Type": "application/json" },
-    body: JSON.stringify({ ok: true, page, per_page, total, has_more, items })
+      statusCode: 200,
+      headers: { ...cors, "Content-Type": "application/json" },
+      body: JSON.stringify({ ok: true, page, per_page, total, has_more, items })
     };
   } catch (e) {
     return { statusCode: 500, headers: cors, body: `Server error: ${e?.message || e}` };
