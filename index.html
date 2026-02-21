@@ -653,47 +653,6 @@
       return apiJson(`/.netlify/functions/assets?page=${page}&per_page=${perPage}`);
     }
 
-    function renderGalleryFromAssets(items) {
-      const gallery = document.getElementById("gallery");
-      gallery.innerHTML = ""; // on remplace les exemples statiques
-
-      if (!items.length) {
-        gallery.innerHTML = `<div class="smallMuted">Aucune image dans le dépôt pour le moment.</div>`;
-        return;
-      }
-
-      for (const it of items) {
-        const col = document.createElement("div");
-        col.className = "col-sm-6";
-
-        // caption simple depuis le nom de fichier
-        const fileName = it.path.split("/").pop() || "Souvenir";
-        const cap = fileName.replace(/^\d+_/, "").replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ");
-
-        col.innerHTML = `
-          <img data-cap="${escapeHtml(cap)}"
-              data-full="${escapeHtml(it.url)}"
-              data-meta="${escapeHtml(it.path)}"
-              src="${escapeHtml(it.url)}"
-              alt="${escapeHtml(cap)}">
-        `;
-        gallery.appendChild(col);
-      }
-    }
-
-    async function refreshGallery() {
-      try {
-        // Optionnel: skeleton simple
-        document.getElementById("gallery").innerHTML = `
-          <div class="col-12 smallMuted">Chargement de la galerie…</div>
-        `;
-        const r = await listAssets();
-        renderGalleryFromAssets(r.items || []);
-      } catch (e) {
-        showStatus(e.message || String(e), "error");
-      }
-    }
-
     const modal = new bootstrap.Modal(document.getElementById("imgModal"));
     $("#gallery").addEventListener("click", (e) => {
       const img = e.target.closest("img");
@@ -727,16 +686,7 @@
         const r = await uploadAsset(file);
         if (!r?.url) throw new Error("Upload OK mais URL manquante.");
 
-        const col = document.createElement("div");
-        col.className = "col-sm-6";
-        col.innerHTML = `
-          <img data-cap="Photo ajoutée"
-               data-full="${escapeHtml(r.url)}"
-               data-meta="Ajoutée via Netlify → commit GitHub"
-               src="${escapeHtml(r.url)}"
-               alt="Photo ajoutée">
-        `;
-        await refreshGallery();
+        await initGallery();
 
         showStatus("Photo ajoutée à la galerie et commitée dans GitHub.", "info");
       } catch (err) {
@@ -801,6 +751,7 @@
       // reset
       $("#gallery").innerHTML = "";
       galleryPage = 1;
+      alleryHasMore = true;
       await loadGalleryPage(galleryPage);
     }
 
