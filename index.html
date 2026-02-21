@@ -466,13 +466,7 @@
     }
   </script>
 
-  <script type="module">
-    setInterval(() => {
-      if (window.turnstile) {
-        turnstile.reset();
-      }
-    }, 20000);
-    
+  <script type="module"> 
     function getTurnstileToken() {
       return window.__TS_TOKEN || "";
     }
