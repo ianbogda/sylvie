@@ -49,8 +49,7 @@ export async function handler(event) {
       return { statusCode: res.status, headers: cors, body: `GitHub error: ${data?.message || "unknown"}` };
     }
 
-    const reactions = data.reactions || {};
-    const count = Number(reactions[reaction]) || 0;
+    const count = Array.isArray(data) ? data.length : 0;
 
     return {
       statusCode: 200,

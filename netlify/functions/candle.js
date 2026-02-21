@@ -36,7 +36,7 @@ export async function handler(event) {
     }
 
     // Create reaction on the dedicated issue
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}/reactions`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}/comments`;
 
     const res = await fetch(apiUrl, {
       method: "POST",
@@ -46,7 +46,9 @@ export async function handler(event) {
         "User-Agent": "sylvie-candles",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ content: reaction })
+      body: JSON.stringify({
+        body: "🕯️"
+      })
     });
 
     const data = await res.json();
