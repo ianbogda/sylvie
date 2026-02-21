@@ -657,7 +657,7 @@
     }
 
     async function listAssets(page = 1, perPage = 12) {
-      return apiJson(`/.netlify/functions/assets?page=${page}&per_page=${perPage}`);
+      return apiJson(`${API_BASE}/assets?page=${page}&per_page=${perPage}`);
     }
 
     const modal = new bootstrap.Modal(document.getElementById("imgModal"));
