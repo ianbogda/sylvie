@@ -505,7 +505,7 @@
       return r.count || 0;
     }
 
-    async function addCandle() {
+    async function addCandle({ turnstileToken }) {
       await apiJson(`${API_BASE}/candle`, {
         method: "POST",
         body: JSON.stringify({ turnstileToken })
@@ -790,7 +790,9 @@
       }
     });
 
-    if ($("#company").value.trim()) return;
+   if ($("#company").value.trim()) {
+     console.warn("Honeypot triggered");
+   }
 
     // Init
     updateCharLeft();
@@ -798,17 +800,18 @@
     await refreshCandles();
     await initGallery();
   </script>
-<div class="cf-turnstile"
-     data-sitekey="0x4AAAAAACgUTiEEzbQG7vkm"
-     data-size="invisible"
-     data-callback="onTurnstileSuccess">
-</div>
 
-<script>
-  window.__TS_TOKEN = "";
-  function onTurnstileSuccess(token) {
-    window.__TS_TOKEN = token;
-  }
-</script>
+  <div class="cf-turnstile"
+      data-sitekey="0x4AAAAAACgUTiEEzbQG7vkm"
+      data-size="invisible"
+      data-callback="onTurnstileSuccess">
+  </div>
+
+  <script>
+    window.__TS_TOKEN = "";
+    function onTurnstileSuccess(token) {
+      window.__TS_TOKEN = token;
+    }
+  </script>
 </body>
 </html>
