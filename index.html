@@ -199,6 +199,98 @@
       box-shadow: 0 16px 36px rgba(18,22,26,.10);
     }
 
+    .metricRow{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .metricLabel{
+      font-weight: 650;
+      letter-spacing: .2px;
+    }
+
+    .metricValue{
+      margin-left:auto;
+      font-weight: 800;
+      font-size: clamp(1.8rem, 2.4vw, 2.6rem);
+      line-height: 1;
+      text-align:right;
+      font-variant-numeric: tabular-nums;
+    }
+    .metricSub{
+      margin-top: 10px;
+    }
+
+    .candleStrip{
+      display:flex;
+      align-items:flex-end;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .candle{
+      width: 10px;
+      height: 18px;
+      border-radius: 6px;
+      border: 1px solid rgba(50,56,62,.12);
+      background: rgba(255,255,255,.78);
+      position: relative;
+      box-shadow: 0 6px 16px rgba(18,22,26,.06);
+    }
+
+    /* flamme */
+    .candle::before{
+      content:"";
+      position:absolute;
+      left:50%;
+      transform: translateX(-50%);
+      top:-10px;
+      width: 8px;
+      height: 10px;
+      border-radius: 8px 8px 8px 8px;
+      background: radial-gradient(circle at 40% 35%,
+        rgba(255,255,255,.9) 0%,
+        rgba(255,223,170,.85) 35%,
+        rgba(242,178,104,.55) 70%,
+        rgba(242,178,104,0) 100%);
+      filter: blur(.2px);
+      opacity: .9;
+      animation: flame 2.8s ease-in-out infinite;
+    }
+
+    /* petite mèche */
+    .candle::after{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:-2px;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 4px;
+      border-radius:2px;
+      background: rgba(60,66,72,.35);
+    }
+
+    @keyframes flame{
+      0%   { transform: translateX(-50%) scale(1); opacity:.85; }
+      50%  { transform: translateX(-50%) scale(1.06); opacity:.95; }
+      100% { transform: translateX(-50%) scale(1); opacity:.88; }
+    }
+
+    /* Respect du recueillement : si l'utilisateur réduit les animations */
+    @media (prefers-reduced-motion: reduce){
+      .candle::before{ animation:none; }
+    }
+
+    /* +X */
+    .candleMore{
+      font-size:.95rem;
+      color: var(--muted);
+      padding-left:6px;
+    }
+
     /* Print */
     @media print{
       body{background:#fff}
@@ -253,15 +345,20 @@
 
             <div class="row g-3 align-items-stretch">
               <div class="col-6 col-lg-3">
-                <div class="metric h-100">
-                  <div class="k">Bougies</div>
-                  <div class="v" id="candleCount">—</div>
+                <div class="metric glass">
+                  <div class="metricRow">
+                    <div class="metricLabel">Bougies</div>
+                    <div class="metricValue" id="candlesCount">14</div>
+                  </div>
+                  <div class="metricSub" id="candlesViz"></div>
                 </div>
               </div>
               <div class="col-6 col-lg-3">
-                <div class="metric h-100">
-                  <div class="k">Messages</div>
-                  <div class="v" id="msgCount">0</div>
+                <div class="metric glass">
+                  <div class="metricRow">
+                    <div class="metricLabel">Messages</div>
+                    <div class="metricValue" id="messagesCount">2</div>
+                  </div>
                 </div>
               </div>
               <div class="col-12 col-lg-6">
