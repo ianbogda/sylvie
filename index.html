@@ -187,11 +187,14 @@
     }
 
     /* Gallery */
-    .gallery img{
-      border-radius: 16px;
+    .gallery img {
+      width: 100%;
+      height: 180px;          /* hauteur visuelle stable et élégante */
+      object-fit: cover;      /* évite les déformations */
       border: 1px solid var(--stroke);
       transition: transform .55s ease, box-shadow .55s ease;
       background: #f1f0ec;
+      display: block;
     }
 
     .gallery img:hover{
@@ -996,7 +999,7 @@ Elle laisse le souvenir d’une présence chaleureuse, d’un esprit libre et d�
     const mount = document.getElementById("candlesViz");
     if (!mount) return;
 
-    const max = 18;                 // sobre
+    const max = 70;                 // sobre
     const shown = Math.min(count, max);
     const more = count - shown;
 
