@@ -495,6 +495,75 @@ Elle laisse le souvenir d’une présence chaleureuse, d’un esprit libre et d�
       return json ?? {};
     }
 
+    // 🔧 Mets ta sitekey Turnstile ici (publique)
+    const TURNSTILE_SITEKEY = "0x4AAAAAACgUTiEEzbQG7vkm";
+
+    let captchaModal;
+    let tsWidgetId = null;
+    let pendingAction = null;   // fonction async à rejouer après captcha
+    let lastToken = "";         // token Turnstile courant
+
+    function ensureCaptchaModal() {
+      if (!captchaModal) {
+        captchaModal = new bootstrap.Modal(document.getElementById("captchaModal"));
+      }
+    }
+
+    function renderTurnstileOnce() {
+      if (!window.turnstile) {
+        throw new Error("Turnstile non chargé (CSP ou script bloqué).");
+      }
+      const mount = document.getElementById("tsMount");
+      if (!mount) throw new Error("#tsMount introuvable");
+
+      // Si déjà rendu, on reset juste
+      if (tsWidgetId !== null) {
+        window.turnstile.reset(tsWidgetId);
+        return;
+      }
+
+      tsWidgetId = window.turnstile.render(mount, {
+        sitekey: TURNSTILE_SITEKEY,
+        size: "normal",
+        callback: (token) => {
+          lastToken = token || "";
+          // dès qu’on a un token, on ferme et on rejoue l’action
+          captchaModal?.hide();
+          const fn = pendingAction;
+          pendingAction = null;
+
+          if (fn) fn().catch(err => showStatus(err.message || String(err), "error"));
+        },
+        "expired-callback": () => { lastToken = ""; },
+        "error-callback": () => {
+          lastToken = "";
+          showStatus("Captcha indisponible. Réessaie.", "error");
+        }
+      });
+    }
+
+    function requireCaptchaAndRun(actionFn) {
+      // Si on a déjà un token, on tente directement
+      if (lastToken) return actionFn();
+
+      pendingAction = actionFn;
+      ensureCaptchaModal();
+
+      // Quand le modal s’affiche, on rend/refresh Turnstile
+      const modalEl = document.getElementById("captchaModal");
+      const onShown = () => {
+        modalEl.removeEventListener("shown.bs.modal", onShown);
+        try {
+          renderTurnstileOnce();
+        } catch (e) {
+          showStatus(e.message || String(e), "error");
+        }
+      };
+      modalEl.addEventListener("shown.bs.modal", onShown);
+
+      captchaModal.show();
+    }
+
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {
         const r = new FileReader();
@@ -513,7 +582,7 @@ Elle laisse le souvenir d’une présence chaleureuse, d’un esprit libre et d�
       });
     }
 
-    async function postMessage({ name, title, message,turnstileToken }) {
+    async function postMessage({ name, title, message, turnstileToken }) {
       return apiJson(`${API_BASE}/message`, {
         method: "POST",
         body: JSON.stringify({ name, title, message, turnstileToken })
@@ -529,7 +598,7 @@ Elle laisse le souvenir d’une présence chaleureuse, d’un esprit libre et d�
       return r.count || 0;
     }
 
-    async function addCandle({ turnstileToken }) {
+    async function addCandle(turnstileToken) {
       await apiJson(`${API_BASE}/candle`, {
         method: "POST",
         body: JSON.stringify({ turnstileToken })
@@ -562,21 +631,36 @@ Elle laisse le souvenir d’une présence chaleureuse, d’un esprit libre et d�
     }
 
     $("#candleBtn").addEventListener("click", async () => {
-      const btn = $("#candleBtn");
+      const btn = document.getElementById("candleBtn");
       const old = btn.textContent;
+
       btn.disabled = true;
       btn.textContent = "🕯️ …";
-      try {
-        await addCandle({ turnstileToken: getTurnstileToken() });
-        await refreshCandles();
-        btn.textContent = "🕯️ Bougie allumée";
-        setTimeout(() => (btn.textContent = old), 900);
-      } catch (e) {
-        showStatus(e.message || String(e), "error");
-        btn.textContent = old;
-      } finally {
-        btn.disabled = false;
-      }
+
+      await requireCaptchaAndRun(async () => {
+        try {
+          await addCandle(lastToken);
+          // Token consommé : on force un nouveau captcha la prochaine fois
+          lastToken = "";
+          if (tsWidgetId !== null) window.turnstile.reset(tsWidgetId);
+
+          await refreshCandles();
+          btn.textContent = "🕯️ Bougie allumée";
+          setTimeout(() => (btn.textContent = old), 900);
+        } catch (e) {
+          // Si backend renvoie captcha failed -> on réouvre le modal
+          if (String(e.message || e).includes("Captcha failed")) {
+            lastToken = "";
+            if (tsWidgetId !== null) window.turnstile.reset(tsWidgetId);
+            requireCaptchaAndRun(pendingAction || (async () => {}));
+          } else {
+            showStatus(e.message || String(e), "error");
+          }
+          btn.textContent = old;
+        } finally {
+          btn.disabled = false;
+        }
+      });
     });
 
     // Guestbook
@@ -636,27 +720,41 @@ Elle laisse le souvenir d’une présence chaleureuse, d’un esprit libre et d�
 
     $("#guestForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const name = $("#name").value.trim();
-      const title = $("#title").value.trim();
-      const message = $("#message").value.trim();
+      const name = document.getElementById("name").value.trim();
+      const title = document.getElementById("title").value.trim();
+      const message = document.getElementById("message").value.trim();
+
       if (!name || !message) return;
 
-      const btn = $("#submitBtn");
+      const btn = document.getElementById("submitBtn");
       btn.disabled = true;
       btn.textContent = "Publication…";
 
-      try {
-        await postMessage({ name, title, message, turnstileToken: getTurnstileToken() });
-        $("#message").value = "";
-        updateCharLeft();
-        showStatus("Message publié.", "info");
-        await refreshMessages();
-      } catch (err) {
-        showStatus(err.message || String(err), "error");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Publier";
-      }
+      await requireCaptchaAndRun(async () => {
+        try {
+          await postMessage({ name, title, message, turnstileToken: lastToken });
+
+          // Token consommé
+          lastToken = "";
+          if (tsWidgetId !== null) window.turnstile.reset(tsWidgetId);
+
+          document.getElementById("message").value = "";
+          showStatus("Message publié.", "info");
+          await refreshMessages();
+        } catch (err) {
+          if (String(err.message || err).includes("Captcha failed")) {
+            lastToken = "";
+            if (tsWidgetId !== null) window.turnstile.reset(tsWidgetId);
+            // Réouvre le modal et retente
+            requireCaptchaAndRun(pendingAction || (async () => {}));
+          } else {
+            showStatus(err.message || String(err), "error");
+          }
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Publier";
+        }
+      });
     });
 
     $("#refreshBtn").addEventListener("click", refreshMessages);
@@ -824,5 +922,28 @@ Elle laisse le souvenir d’une présence chaleureuse, d’un esprit libre et d�
     await refreshCandles();
     await initGallery();
   </script>
+<!-- Modal Captcha -->
+<div class="modal fade" id="captchaModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass" style="border-radius:18px;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" style="font-weight:900;">Validation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body pt-0">
+        <p class="smallMuted mb-3">
+          Merci de confirmer avant de continuer.
+        </p>
+
+        <!-- Turnstile widget mount -->
+        <div id="tsMount" class="d-flex justify-content-center"></div>
+
+        <div class="smallMuted mt-3">
+          Une fois validé, l’action reprendra automatiquement.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
