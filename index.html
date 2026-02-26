@@ -697,8 +697,11 @@ Elle laisse le souvenir d’une présence chaleureuse, d’un esprit libre et d�
       try {
         const n = await getCandles();
         $("#candleCount").textContent = String(n);
+        renderCandleViz(n);
       } catch (e) {
         $("#candleCount").textContent = "—";
+        const mount = document.getElementById("candlesViz");
+        if (mount) mount.innerHTML = "";
         showStatus(e.message || String(e), "error");
       }
     }
@@ -988,6 +991,36 @@ Elle laisse le souvenir d’une présence chaleureuse, d’un esprit libre et d�
    if ($("#company").value.trim()) {
      console.warn("Honeypot triggered");
    }
+
+  function renderCandleViz(count){
+    const mount = document.getElementById("candlesViz");
+    if (!mount) return;
+
+    const max = 18;                 // sobre
+    const shown = Math.min(count, max);
+    const more = count - shown;
+
+    const strip = document.createElement("div");
+    strip.className = "candleStrip";
+
+    for (let i = 0; i < shown; i++){
+      const c = document.createElement("div");
+      c.className = "candle";
+      // désynchronisation douce
+      c.style.setProperty("--d", `${(i % 6) * 0.15}s`);
+      strip.appendChild(c);
+    }
+
+    if (more > 0){
+      const m = document.createElement("div");
+      m.className = "candleMore";
+      m.textContent = `+${more}`;
+      strip.appendChild(m);
+    }
+
+    mount.innerHTML = "";
+    mount.appendChild(strip);
+  }
 
     // Init
     updateCharLeft();
